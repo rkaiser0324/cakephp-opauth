@@ -1,3 +1,6 @@
 [submodule "Vendor/Opauth"]
 	path = Vendor/Opauth
 	url = git://github.com/uzyn/opauth.git
+[submodule "Strategy/Facebook"]
+	path = Strategy/Facebook
+	url = git://github.com/uzyn/opauth-facebook
