@@ -125,37 +125,13 @@ class OpauthAppController extends AppController {
      * @param array $config User configuration
      * @param boolean $run Whether Opauth should auto run after initialization.
      */
-    protected function _loadOpauth($config = null, $run = false) {
-        // Update dependent config in case the dependency is overwritten at app-level
-        // $x = Configure::read('Opauth.Strategy.Facebook');
-        
-
-//        array_me
-//        $config = array(
-//            'path' => '/auth/',
-//            'callback_url' => '/auth/callback.php',
-//            'security_salt' => 'LDFmiilYf8Fyw5W10rx4W1KsVrieQCnpBzzpTBWA5vJidQKDx8pMJbmw28R1C4R',
-//            'Strategy' => array(
-//                // Define strategies and their respective configs here
-//                'Facebook' => array(
-//                    'app_id' => '228026217213102',
-//                    'app_secret' => '2ff8c4856f3a75f2ea5e22c7889a463f'
-//                ),
-//            )
-//        );
-
-//        if (Configure::read('Opauth.callback_url') == '/auth/callback') {
-//            Configure::write('Opauth.callback_url', Configure::read('Opauth.path') . 'callback');
-//        }
-//
+    protected function _loadOpauth($config = null, $run = false) { 
+        // Load the parent configuration file as per http://book.cakephp.org/2.0/en/development/configuration.html#loading-configuration-files
+        Configure::config('private', new PhpReader(ROOT . DS . 'app' . DS . 'Config' . DS));
+        Configure::load('private.php', 'private');
         if (is_null($config)) {
             $config = Configure::read('Opauth');
-        }
-        $config['Strategy']['Facebook'] = array(
-                    'app_id' => '228026217213102',
-                    'app_secret' => '2ff8c4856f3a75f2ea5e22c7889a463f'
-                );
-//debug($config);die();
+        }        
         App::import('Vendor', 'Opauth.Opauth/lib/Opauth/Opauth');
         $this->Opauth = new Opauth($config, $run);
     }
