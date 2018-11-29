@@ -1,5 +1,5 @@
 {
-	"name": "uzyn/cakephp-opauth",
+	"name": "rkaiser0324/cakephp-opauth",
 	"description": "Opauth plugin for CakePHP v2.x, allowing simple plug-n-play 3rd-party authentication with CakePHP",
 	"type": "cakephp-plugin",
 	"keywords": ["cakephp", "opauth", "authentication", "auth", "oauth"],
@@ -15,9 +15,15 @@
 	"require": {
 		"php": ">=5.2.0",
 		"composer/installers": "1.*",
-		"opauth/opauth": ">=0.2.0"
+		"opauth/opauth": "dev-master"
 	},
 	"extra": {
-	    "installer-name": "Opauth"
-    }
+		"installer-name": "Opauth"
+	},
+	"repositories": [
+        {
+            "url": "https://github.com/rkaiser0324/opauth.git",
+            "type": "git"
+		}
+	]
 }
