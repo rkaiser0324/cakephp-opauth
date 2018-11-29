@@ -24,7 +24,9 @@ class OpauthAppController extends AppController
     {
         parent::__construct($request, $response);
 
-        $this->autoRender = false;
+		$this->autoRender = false;
+
+		$this->_getConfig();
     }
 
     /**
@@ -48,7 +50,7 @@ class OpauthAppController extends AppController
         /**
         * Fetch auth response, based on transport configuration for callback
         */
-        switch (Configure::read('Opauth.callback_transport')) {
+        switch ($this->_config['callback_transport']) {
             case 'session':
                 if (!session_id()) {
                     session_start();
@@ -60,14 +62,13 @@ class OpauthAppController extends AppController
                 }
                 break;
             case 'post':
-                $response = unserialize(base64_decode($_POST['opauth']));
+                $response = json_decode((base64_decode($_POST['opauth'])), true);
                 break;
             case 'get':
-                $response = unserialize(base64_decode($_GET['opauth']));
+                $response = json_decode((base64_decode($_GET['opauth'])), true);
                 break;
             default:
-                echo '<strong style="color: red;">Error: </strong>Unsupported callback_transport.'."<br>\n";
-                break;
+                throw new exception("Unsupported callback_transport: " . $this->_config['callback_transport']);
         }
 
         /**
@@ -107,17 +108,13 @@ class OpauthAppController extends AppController
         }
 
         /**
-         * Redirect user to /opauth-complete
-         * with validated response data available as POST data
-         * retrievable at $this->data at your app's controller
+         * Redirect user to the Opauth.cakephp_plugin_complete_url
+		 *
+		 * The validated response data is available as POST data, retrievable at $this->data at your app's controller.
          */
-        $completeUrl = Configure::read('Opauth._cakephp_plugin_complete_url');
-        if (empty($completeUrl)) {
-            $completeUrl = Router::url('/opauth-complete');
-        }
+        $completeUrl = empty($this->_config['cakephp_plugin_complete_url']) ? Router::url('/opauth-complete') : $this->_config['cakephp_plugin_complete_url'];
 
-
-        $CakeRequest = new CakeRequest('/opauth-complete');
+        $CakeRequest = new CakeRequest($completeUrl);
         $CakeRequest->data = $response;
 
         $Dispatcher = new Dispatcher();
@@ -133,15 +130,24 @@ class OpauthAppController extends AppController
      */
     protected function _loadOpauth($config = null, $run = false)
     {
+		$this->_getConfig($config);
+        $this->Opauth = new Opauth($this->_config, $run);
+	}
+
+	/**
+	 * Load the app private configuration file as per http://book.cakephp.org/2.0/en/development/configuration.html#loading-configuration-files
+	 *
+	 * @param array $config				Optional config to set
+	 */
+	private function _getConfig($config = null)
+	{
         if (is_null($config)) {
-            // Load the parent configuration file as per http://book.cakephp.org/2.0/en/development/configuration.html#loading-configuration-files
+
             Configure::config('private', new PhpReader(ROOT . DS . 'app' . DS . 'Config' . DS));
             Configure::load('private.php', 'private');
 
             $config = Configure::read('Opauth');
         }
         $this->_config = $config;
-
-        $this->Opauth = new Opauth($this->_config, $run);
-    }
+	}
 }
